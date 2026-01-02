@@ -1,0 +1,25 @@
+{
+  "name": "selene",
+  "version": "0.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "clean": "bun update --latest && bun expo install --check && bunx sort-package-json",
+    "start": "expo start"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@supabase/supabase-js": "2.89.0",
+    "expo": "54.0.30",
+    "expo-router": "6.0.21",
+    "lucide-react-native": "0.562.0",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-safe-area-context": "5.6.2",
+    "react-native-screens": "~4.16.0"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.10",
+    "prettier": "3.7.4",
+    "typescript": "5.9.3"
+  }
+}

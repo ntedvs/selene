@@ -1,0 +1,4 @@
+{
+  "scheme": "selene",
+  "plugins": ["expo-router"]
+}
