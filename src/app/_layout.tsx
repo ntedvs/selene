@@ -1,30 +1,27 @@
-import { Stack, Tabs } from "expo-router"
-import { Home, User } from "lucide-react-native"
-import { Text } from "react-native"
-import { auth } from "~/hooks/auth"
+import { Stack } from "expo-router"
+import { AuthProvider, useAuth } from "~/contexts/auth-context"
 
 export default function Layout() {
-  const session = auth()
+  return (
+    <AuthProvider>
+      <RootStack />
+    </AuthProvider>
+  )
+}
 
-  if (session) {
-    return (
-      <Stack>
-        <Text>Hey</Text>
-      </Stack>
-    )
-  }
+function RootStack() {
+  const { session, loading } = useAuth()
+  if (loading) return null
 
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
-      <Tabs.Screen
-        name="index"
-        options={{ title: "Home", tabBarIcon: () => <Home /> }}
-      />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="index" />
+      </Stack.Protected>
 
-      <Tabs.Screen
-        name="profile"
-        options={{ title: "Profile", tabBarIcon: () => <User /> }}
-      />
-    </Tabs>
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="auth" />
+      </Stack.Protected>
+    </Stack>
   )
 }

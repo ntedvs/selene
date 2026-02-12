@@ -1,86 +1,141 @@
 import { useState } from "react"
-import { Alert, Pressable, Text, TextInput } from "react-native"
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native"
 import { supabase } from "~/lib/supabase"
 
-// // Tells Supabase Auth to continuously refresh the session automatically if
-// // the app is in the foreground. When this is added, you will continue to receive
-// // `onAuthStateChange` events with the `TOKEN_REFRESHED` or `SIGNED_OUT` event
-// // if the user's session is terminated. This should only be registered once.
-// AppState.addEventListener("change", (state) => {
-//   if (state === "active") {
-//     supabase.auth.startAutoRefresh()
-//   } else {
-//     supabase.auth.stopAutoRefresh()
-//   }
-// })
-
 export default function Auth() {
-  const [creating, setCreating] = useState(true)
+  const [mode, setMode] = useState<"login" | "signup">("signup")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const signUp = async () => {
+  async function handleSubmit() {
     setLoading(true)
-
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) Alert.alert(error.message)
-
+    const { error } =
+      mode === "login"
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({ email, password })
     setLoading(false)
-  }
-
-  const logIn = async () => {
-    setLoading(true)
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    if (!data.session) Alert.alert("Check your inbox for verification")
-    if (error) Alert.alert(error.message)
-
-    setLoading(false)
+    if (error) Alert.alert("Error", error.message)
   }
 
   return (
-    <>
+    <View style={styles.container}>
+      <Text style={styles.title}>
+        {mode === "login" ? "Log in" : "Sign up"}
+      </Text>
+
       <TextInput
+        style={styles.input}
+        placeholder="Email"
+        placeholderTextColor="#888"
         value={email}
         onChangeText={setEmail}
-        style={{
-          borderColor: "red",
-          borderStyle: "solid",
-          borderWidth: 10,
-          marginTop: 80,
-        }}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        autoComplete="email"
       />
 
       <TextInput
+        style={styles.input}
+        placeholder="Password"
+        placeholderTextColor="#888"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={{
-          borderColor: "red",
-          borderStyle: "solid",
-          borderWidth: 10,
-          marginTop: 80,
-        }}
+        autoComplete={mode === "login" ? "current-password" : "new-password"}
       />
 
-      <Pressable onPress={creating ? signUp : logIn} disabled={loading}>
-        <Text>{creating ? "Sign Up" : "Log In"}</Text>
+      <Pressable
+        style={({ pressed }) => [
+          styles.button,
+          pressed && styles.buttonPressed,
+        ]}
+        onPress={handleSubmit}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>
+            {mode === "login" ? "Log in" : "Sign up"}
+          </Text>
+        )}
       </Pressable>
 
-      <Pressable onPress={() => setCreating(!creating)}>
-        <Text>
-          {creating ? "Already have an account? " : "Don't have an account? "}
-
-          <Text style={{ color: "blue" }}>
-            {creating ? "Log in" : "Sign up"}
+      <Pressable
+        onPress={() => setMode(mode === "login" ? "signup" : "login")}
+        style={styles.toggle}
+      >
+        <Text style={styles.toggleText}>
+          {mode === "login"
+            ? "Don't have an account? "
+            : "Already have an account? "}
+          <Text style={styles.toggleAction}>
+            {mode === "login" ? "Sign up" : "Log in"}
           </Text>
         </Text>
       </Pressable>
-    </>
+    </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 24,
+    backgroundColor: "#000",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 32,
+    textAlign: "center",
+  },
+  input: {
+    backgroundColor: "#1a1a1a",
+    color: "#fff",
+    borderRadius: 8,
+    padding: 14,
+    fontSize: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  button: {
+    backgroundColor: "#2563eb",
+    borderRadius: 8,
+    padding: 14,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  buttonPressed: {
+    opacity: 0.8,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  toggle: {
+    marginTop: 24,
+    alignItems: "center",
+  },
+  toggleText: {
+    color: "#888",
+    fontSize: 14,
+  },
+  toggleAction: {
+    color: "#2563eb",
+    fontWeight: "600",
+  },
+})
