@@ -1,9 +1,4 @@
 {
   "scheme": "selene",
-  "plugins": ["expo-router"],
-  "extra": {
-    "router": {},
-    "eas": { "projectId": "25958fca-b339-4d02-8913-eedc81b0b0cb" }
-  },
-  "owner": "selene.care"
+  "plugins": ["expo-router"]
 }

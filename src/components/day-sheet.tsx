@@ -16,14 +16,12 @@ type LogType = {
   type: string
   label: string
   options: Option[]
-  segmented?: boolean
 }
 
 const LOG_TYPES: LogType[] = [
   {
     type: "period",
     label: "Period flow",
-    segmented: true,
     options: [
       { value: "extra light", label: "XL" },
       { value: "light", label: "L" },
@@ -35,7 +33,6 @@ const LOG_TYPES: LogType[] = [
   {
     type: "cramps",
     label: "Cramps",
-    segmented: true,
     options: [
       { value: "light", label: "L" },
       { value: "medium", label: "M" },
@@ -45,7 +42,6 @@ const LOG_TYPES: LogType[] = [
   {
     type: "sex",
     label: "Sex",
-    segmented: true,
     options: [
       { value: "protected", label: "Protected" },
       { value: "unprotected", label: "Unprotected" },
@@ -156,61 +152,31 @@ export function DaySheet({ date, logs, onToggle, onClose }: Props) {
             return (
               <View key={lt.type} style={styles.section}>
                 <Text style={styles.sectionLabel}>{lt.label}</Text>
-                {lt.segmented ? (
-                  <View style={styles.segmented}>
-                    {lt.options.map((opt, idx) => {
-                      const selected = current === opt.value
-                      const isFirst = idx === 0
-                      const isLast = idx === lt.options.length - 1
-                      return (
-                        <Pressable
-                          key={opt.value}
+                <View style={styles.segmented}>
+                  {lt.options.map((opt, idx) => {
+                    const selected = current === opt.value
+                    return (
+                      <Pressable
+                        key={opt.value}
+                        style={[
+                          styles.segment,
+                          selected && styles.segmentSelected,
+                          idx === 0 && styles.segmentFirst,
+                        ]}
+                        onPress={() => handlePress(lt.type, opt.value)}
+                      >
+                        <Text
                           style={[
-                            styles.segment,
-                            selected && styles.segmentSelected,
-                            isFirst && styles.segmentFirst,
-                            isLast && styles.segmentLast,
+                            styles.segmentText,
+                            selected && styles.segmentTextSelected,
                           ]}
-                          onPress={() => handlePress(lt.type, opt.value)}
                         >
-                          <Text
-                            style={[
-                              styles.segmentText,
-                              selected && styles.segmentTextSelected,
-                            ]}
-                          >
-                            {opt.label}
-                          </Text>
-                        </Pressable>
-                      )
-                    })}
-                  </View>
-                ) : (
-                  <View style={styles.options}>
-                    {lt.options.map((opt) => {
-                      const selected = current === opt.value
-                      return (
-                        <Pressable
-                          key={opt.value}
-                          style={[
-                            styles.option,
-                            selected && styles.optionSelected,
-                          ]}
-                          onPress={() => handlePress(lt.type, opt.value)}
-                        >
-                          <Text
-                            style={[
-                              styles.optionText,
-                              selected && styles.optionTextSelected,
-                            ]}
-                          >
-                            {opt.label}
-                          </Text>
-                        </Pressable>
-                      )
-                    })}
-                  </View>
-                )}
+                          {opt.label}
+                        </Text>
+                      </Pressable>
+                    )
+                  })}
+                </View>
               </View>
             )
           })}
@@ -227,10 +193,10 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.35)",
   },
   sheet: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#f5f5f5",
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     paddingHorizontal: 24,
@@ -245,10 +211,10 @@ const styles = StyleSheet.create({
     width: 36,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "#555",
+    backgroundColor: "#ccc",
   },
   title: {
-    color: "#fff",
+    color: "#111",
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 24,
@@ -268,7 +234,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: "#ddd",
     overflow: "hidden",
   },
   segment: {
@@ -276,46 +242,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: "center",
     borderLeftWidth: 1,
-    borderLeftColor: "#333",
+    borderLeftColor: "#ddd",
   },
   segmentFirst: {
     borderLeftWidth: 0,
   },
-  segmentLast: {},
   segmentSelected: {
     backgroundColor: "#e11d48",
   },
   segmentText: {
-    color: "#666",
+    color: "#999",
     fontSize: 14,
     fontWeight: "500",
   },
   segmentTextSelected: {
     color: "#fff",
-    fontWeight: "700",
-  },
-  options: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  option: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#333",
-    alignItems: "center",
-  },
-  optionSelected: {
-    backgroundColor: "#e11d48",
-    borderColor: "#e11d48",
-  },
-  optionText: {
-    color: "#666",
-    fontSize: 15,
-    fontWeight: "500",
-  },
-  optionTextSelected: {
     fontWeight: "700",
   },
 })

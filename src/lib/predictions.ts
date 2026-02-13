@@ -1,3 +1,5 @@
+import { addDays } from "~/lib/dates"
+
 export type CycleInfo = {
   startDate: string
   duration: number
@@ -21,16 +23,11 @@ type LogEntry = { date: string; type: string; value: string | null }
 
 const WEIGHTS = [0.3, 0.25, 0.2, 0.12, 0.08, 0.05]
 const PREDICTION_COUNT = 6
+const DEFAULT_STD_DEV = 3
 
 function daysBetween(a: string, b: string): number {
   const msPerDay = 86400000
   return Math.round((new Date(b).getTime() - new Date(a).getTime()) / msPerDay)
-}
-
-function addDays(date: string, days: number): string {
-  const d = new Date(date)
-  d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
 }
 
 /** Group consecutive period-log dates into periods (gap of 2+ days = new period) */
@@ -82,7 +79,7 @@ function weightedAverage(lengths: number[]): number {
 }
 
 function stdDev(lengths: number[]): number {
-  if (lengths.length < 2) return 3 // default when not enough data
+  if (lengths.length < 2) return DEFAULT_STD_DEV
   const mean = lengths.reduce((s, v) => s + v, 0) / lengths.length
   const variance =
     lengths.reduce((s, v) => s + (v - mean) ** 2, 0) / (lengths.length - 1)

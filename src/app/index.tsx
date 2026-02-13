@@ -1,5 +1,5 @@
-import { Calendar } from "~/components/calendar"
+import { Redirect } from "expo-router"
 
 export default function Index() {
-  return <Calendar />
+  return <Redirect href="/(tabs)/calendar" />
 }

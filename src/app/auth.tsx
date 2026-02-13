@@ -1,12 +1,15 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   ActivityIndicator,
   Alert,
+  Animated,
+  Easing,
+  Keyboard,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
-  View,
 } from "react-native"
 import { supabase } from "~/lib/supabase"
 
@@ -15,22 +18,50 @@ export default function Auth() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const offset = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    const show = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow"
+    const hide = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide"
+
+    function animateTo(toValue: number, duration: number) {
+      Animated.timing(offset, {
+        toValue,
+        duration,
+        easing: Easing.bezier(0.38, 0.7, 0.2, 1),
+        useNativeDriver: true,
+      }).start()
+    }
+
+    const onShow = Keyboard.addListener(show, (e) =>
+      animateTo(-(e.endCoordinates.height / 3), e.duration ?? 250),
+    )
+    const onHide = Keyboard.addListener(hide, (e) =>
+      animateTo(0, e.duration ?? 250),
+    )
+
+    return () => {
+      onShow.remove()
+      onHide.remove()
+    }
+  }, [])
+
+  const isLogin = mode === "login"
 
   async function handleSubmit() {
     setLoading(true)
-    const { error } =
-      mode === "login"
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password })
+    const { error } = isLogin
+      ? await supabase.auth.signInWithPassword({ email, password })
+      : await supabase.auth.signUp({ email, password })
     setLoading(false)
     if (error) Alert.alert("Error", error.message)
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        {mode === "login" ? "Log in" : "Sign up"}
-      </Text>
+    <Animated.View
+      style={[styles.container, { transform: [{ translateY: offset }] }]}
+    >
+      <Text style={styles.title}>{isLogin ? "Log in" : "Sign up"}</Text>
 
       <TextInput
         style={styles.input}
@@ -50,7 +81,7 @@ export default function Auth() {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        autoComplete={mode === "login" ? "current-password" : "new-password"}
+        autoComplete={isLogin ? "current-password" : "new-password"}
       />
 
       <Pressable
@@ -65,25 +96,23 @@ export default function Auth() {
           <ActivityIndicator color="#fff" />
         ) : (
           <Text style={styles.buttonText}>
-            {mode === "login" ? "Log in" : "Sign up"}
+            {isLogin ? "Log in" : "Sign up"}
           </Text>
         )}
       </Pressable>
 
       <Pressable
-        onPress={() => setMode(mode === "login" ? "signup" : "login")}
+        onPress={() => setMode(isLogin ? "signup" : "login")}
         style={styles.toggle}
       >
         <Text style={styles.toggleText}>
-          {mode === "login"
-            ? "Don't have an account? "
-            : "Already have an account? "}
+          {isLogin ? "Don't have an account? " : "Already have an account? "}
           <Text style={styles.toggleAction}>
-            {mode === "login" ? "Sign up" : "Log in"}
+            {isLogin ? "Sign up" : "Log in"}
           </Text>
         </Text>
       </Pressable>
-    </View>
+    </Animated.View>
   )
 }
 
@@ -92,24 +121,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 24,
-    backgroundColor: "#000",
+    paddingBottom: 200,
+    marginBottom: -200,
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#fff",
+    color: "#111",
     marginBottom: 32,
     textAlign: "center",
   },
   input: {
-    backgroundColor: "#1a1a1a",
-    color: "#fff",
+    backgroundColor: "#f5f5f5",
+    color: "#111",
     borderRadius: 8,
     padding: 14,
     fontSize: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: "#ddd",
   },
   button: {
     backgroundColor: "#2563eb",
